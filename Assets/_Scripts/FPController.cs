@@ -1,6 +1,5 @@
 using System.Collections;
 using System.Collections.Generic;
-using Unity.VisualScripting.Dependencies.NCalc;
 using UnityEngine;
 
 public class FPController : MonoBehaviour
@@ -22,6 +21,11 @@ public class FPController : MonoBehaviour
     private Vector3 jumpDir;
     private Rigidbody rb;
 
+    public GameObject weaponParent;
+    public GameObject weapon1;
+    public GameObject weapon2;
+    private int currentWeapon = 1;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -30,11 +34,14 @@ public class FPController : MonoBehaviour
 
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
+        weapon1.SetActive(true);
+        weapon2.SetActive(false);
     }
 
     // Update is called once per frame
     void Update()
     {
+
         // grab variables for all the input
         float h = Input.GetAxis("Horizontal");
         float v = Input.GetAxis("Vertical");
@@ -53,7 +60,7 @@ public class FPController : MonoBehaviour
             0,
             yaw * yawSpeed * Time.deltaTime,
             0);
-        
+
         float pitchDelta = -1 * pitch * pitchSpeed * Time.deltaTime;
         float newPitch = Camera.main.transform.localEulerAngles.x + pitchDelta;
         newPitch = AngleWithin180(newPitch);
@@ -65,10 +72,37 @@ public class FPController : MonoBehaviour
             Camera.main.transform.localEulerAngles.y,
             Camera.main.transform.localEulerAngles.z);
 
+
         if (jump && Physics.Raycast(groundRef.position, transform.up * -1, .015f))
         {
             rb.AddForce(jumpForce * jumpDir, ForceMode.Impulse);
         }
+
+        if (Input.GetKeyDown(KeyCode.Alpha1) && currentWeapon != 1)
+        {
+            currentWeapon = 1;
+            weapon1.SetActive(true);
+            weapon2.SetActive(false);
+        }
+        else if (Input.GetKeyDown(KeyCode.Alpha2) && currentWeapon != 2)
+        {
+            currentWeapon = 2;
+            weapon1.SetActive(false);
+            weapon2.SetActive(true);
+        }
+
+        if(Input.GetMouseButtonDown(0))
+        {
+            if (currentWeapon == 1)
+            {
+                weapon1.GetComponent<Weapon>().Shoot();
+            }
+            else if (currentWeapon == 2)
+            {
+                weapon2.GetComponent<Weapon>().Shoot();
+            }
+        }
+
     }
 
 //precondition: angle is between 0 and 360
